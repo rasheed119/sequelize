@@ -1,8 +1,10 @@
 const express = require("express");
 const UserModel = require("../models/Usermodel");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 const router = express.Router();
+const secretkey = process.env.SECRET_KEY;
 
 router.get("/", async (req, res) => {
   try {
@@ -112,7 +114,10 @@ router.post("/login", async (req, res) => {
     if (!compare_pass) {
       return res.status(400).json({ Error: "Invalid Password" });
     }
-    res.status(200).json({
+    const token = jwt.sign({ id: findUser.id }, secretkey, {
+      expiresIn: "30m",
+    });
+    res.cookie("access_token",token).status(200).json({
       message: "User Logged In Successfull",
       User_Details: { FName: findUser.FName, LName: findUser.LName, Email },
     });
